@@ -17,15 +17,7 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(route);
 
-let downloadPath;
-
-if (process.platform === 'win32' || process.platform === 'darwin') {
-    downloadPath = path.join(os.homedir(), 'Downloads');
-} else if (process.platform === 'android') {
-    downloadPath = '/storage/emulated/0/Download';
-} else {
-    downloadPath = os.homedir();
-}
+let downloadPath = './downloads';
 
 route.get('/', (request, response) => {
     response.sendFile(path.join(__dirname, 'home.html'));
@@ -71,7 +63,22 @@ route.post('/download', (request, response) => {
         outputStream.on('finish', () => {
             console.log(`\nFinished downloading: ${outputPath}\n`);
             downloadInProgress = false;
-            response.status(200).send('Download complete');
+
+            response.download(outputPath, `${uniqueId}.mp4`, (err) => {
+                if (err) {
+                    console.error('Error sending file:', err);
+                    response.sendStatus(500);
+                } else {
+                    console.log('File sent successfully');
+                    fs.unlink(outputPath, (unlinkErr) => {
+                        if (unlinkErr) {
+                            console.error('Error deleting file:', unlinkErr);
+                        } else {
+                            console.log('File deleted successfully');
+                        }
+                    });
+                }
+            });
         });
 
         

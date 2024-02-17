@@ -159,10 +159,21 @@
                 },
                 body: JSON.stringify({videoUrl: videoUrl})
             },
-                document.getElementById('progress').innerHTML = `<div>Downloading...</div>`
+                document.getElementById('progress').innerHTML = `<div>Preparing Download file...</div>`
              ).then(response => {
                 if (response.ok) {
-                    document.getElementById('progress').innerHTML = `<div>Download Complete</div>`;
+                    response.blob().then(blob => {
+                        const url  = window.URL.createObjectURL(blob);
+                        const a    = document.createElement('a');
+                        a.href     = url;
+                        a.download = url.replace(/^.*[\\\/]/, '');
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        a.remove();
+                    });
+
+                    document.getElementById('progress').innerHTML = `<div>Start Downloading...</div>`;
                     span.style.display = "block";
                     input.value = '';
                 } else {
