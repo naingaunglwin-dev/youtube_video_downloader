@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Youtube video downloader using node.js",
   "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
