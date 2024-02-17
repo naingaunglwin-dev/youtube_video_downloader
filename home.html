@@ -152,7 +152,7 @@
             span.style.display  = "none";
             container.classList.add("inactive");
 
-            fetch('https://nal-youtube-video-downloader.netlify.app/download', {
+            fetch('/download', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

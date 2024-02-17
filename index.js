@@ -28,7 +28,6 @@ if (process.platform === 'win32') {
 }
 
 route.get('/', (request, response) => {
-    console.log('success', request);
     response.sendFile(path.join(__dirname, 'home.html'));
 });
 
@@ -83,6 +82,5 @@ route.post('/download', (request, response) => {
 });
 
 app.listen(3000, () => {
-    console.log(process.env.PORT)
-    console.log(`Server is running on port 3000\n> http://127.0.0.1:3000`);
+    console.log(`Server is running`);
 })
