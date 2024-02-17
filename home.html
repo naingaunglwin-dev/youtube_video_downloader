@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youtube Downloader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: grid;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .container input {
+            display: block;
+            margin: 10px 0;
+        }
+
+        .container > div {
+            place-self: center;
+            max-width: 400px;
+            width: 400px;
+            padding: 10px;
+            border-radius: 9px;
+            text-align: center;
+            box-shadow: 5px 8px 30px -6px rgba(0,0,0,0.7);
+            -webkit-box-shadow: 5px 8px 30px -6px rgba(0,0,0,0.7);
+            -moz-box-shadow: 5px 8px 30px -6px rgba(0,0,0,0.7);
+        }
+
+        .container.inactive {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        input[type='text'] {
+            width: 99.8%;
+            height: 35px;
+            border: none;
+            outline: none;
+            background: rgb(224, 224, 224);
+            font-size: 10pt;
+            border-radius: 4px;
+            pointer-events: auto;
+        }
+
+        #btn {
+            width: 100%;
+            height: 30px;
+            border: none;
+            outline: none;
+            background: rgb(34, 152, 255);
+            border-radius: 3px;
+            color: white;
+            padding: 0 10px;
+            pointer-events: auto;
+        }
+
+        #btn:hover {
+            background: rgb(29, 133, 223);
+            cursor: pointer;
+        }
+
+        #myModal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 5px 8px 28px -6px rgba(0,0,0,0.67);
+            -webkit-box-shadow: 5px 8px 28px -6px rgba(0,0,0,0.67);
+            -moz-box-shadow: 5px 8px 28px -6px rgba(0,0,0,0.67);
+            border-radius: 9px;
+            width: 42%;
+            height: 100px;
+            background-color: white;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            display: flex;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .close {
+            padding: 0 8px;
+            font-size: 19pt;
+            color: red;
+            height: 30px;
+        }
+
+        .close:hover {
+            cursor: pointer;
+        }
+
+        #progress {
+            padding: 0 30px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <h1>Youtube Video Downloader</h1>
+            <form id="form" enctype="application/x-www-form-urlencoded">
+                <input type="text" id="url" placeholder="Put youtube video url here">
+                <input type="submit" value="Download" id="btn">
+            </form>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div id="progress">
+                <div>
+                    Download
+                </div>
+            </div>
+            <span class="close" title="close">&times;</span>
+        </div>
+    </div>
+
+    <script>
+        let container = document.querySelector('.container');
+
+        let modal = document.getElementById("myModal");
+
+        let span = document.getElementsByClassName("close")[0];
+
+        document.getElementById('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const input = document.getElementById('url');
+            const videoUrl = input.value;
+
+            modal.style.display = "block";
+            span.style.display  = "none";
+            container.classList.add("inactive");
+
+            fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({videoUrl: videoUrl})
+            },
+                document.getElementById('progress').innerHTML = `<div>Downloading...</div>`
+             ).then(response => {
+                if (response.ok) {
+                    document.getElementById('progress').innerHTML = `<div>Download Complete</div>`;
+                    span.style.display = "block";
+                    input.value = '';
+                } else {
+                    document.getElementById('progress').innerHTML = `<div>Failed to download</div>`;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+       span.onclick = function() {
+            modal.style.display = "none";
+            container.classList.remove("inactive");
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                container.classList.remove("inactive");
+            }
+        }
+    </script>
+</body>
+</html>
