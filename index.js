@@ -1,15 +1,18 @@
-const ytdl               = require('ytdl-core');
-const fs                  = require('fs');
-const path              = require('path');
-const os                 = require('os');
-const uuid              = require('uuid');
-const express       = require('express');
+const ytdl       = require('ytdl-core');
+const fs         = require('fs');
+const path       = require('path');
+const os         = require('os');
+const uuid       = require('uuid');
+const express    = require('express');
 const bodyParser = require('body-parser');
+const cors       = require('cors');
 
 const app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+
+app.use(cors());
 
 let downloadPath;
 
@@ -75,6 +78,6 @@ app.post('/download', (request, response) => {
     });
 });
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || 3000, () => {
     console.log(`Server is running on port 3000\n> http://127.0.0.1:3000`);
 })

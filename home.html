@@ -167,6 +167,7 @@
                     input.value = '';
                 } else {
                     document.getElementById('progress').innerHTML = `<div>Failed to download</div>`;
+                    span.style.display = "block";
                 }
             })
             .catch(error => console.error('Error:', error));
