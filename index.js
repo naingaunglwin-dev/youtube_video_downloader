@@ -4,15 +4,18 @@ const path       = require('path');
 const os         = require('os');
 const uuid       = require('uuid');
 const express    = require('express');
+const { Router } = require('express');
 const bodyParser = require('body-parser');
 const cors       = require('cors');
 
 const app = express();
+const route = Router();
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 app.use(cors());
+app.use(route);
 
 let downloadPath;
 
@@ -24,13 +27,14 @@ if (process.platform === 'win32') {
     downloadPath = os.homedir();
 }
 
-app.get('/', (request, response) => {
+route.get('/', (request, response) => {
+    console.log('success', request);
     response.sendFile(path.join(__dirname, 'home.html'));
 });
 
 let downloadInProgress = false;
 
-app.post('/download', (request, response) => {
+route.post('/download', (request, response) => {
     const videoUrl = request.body.videoUrl;
 
     if (downloadInProgress) {
@@ -78,6 +82,7 @@ app.post('/download', (request, response) => {
     });
 });
 
-app.listen(process.env.PORT || 3000, () => {
+app.listen(3000, () => {
+    console.log(process.env.PORT)
     console.log(`Server is running on port 3000\n> http://127.0.0.1:3000`);
 })
