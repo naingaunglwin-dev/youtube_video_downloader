@@ -19,10 +19,10 @@ app.use(route);
 
 let downloadPath;
 
-if (process.platform === 'win32') {
+if (process.platform === 'win32' || process.platform === 'darwin') {
     downloadPath = path.join(os.homedir(), 'Downloads');
 } else if (process.platform === 'android') {
-    downloadPath = '/sdcard/Download';
+    downloadPath = '/storage/emulated/0/Download';
 } else {
     downloadPath = os.homedir();
 }
@@ -57,19 +57,19 @@ route.post('/download', (request, response) => {
             downloaded += chunkLength;
     
             const percent = downloaded / totalBytes * 100;
-            process.stdout.clearLine();
-            process.stdout.cursorTo(0);
-            process.stdout.write(`Downloading... ${percent.toFixed(2)}%`);
+            // process.stdout.clearLine();
+            // process.stdout.cursorTo(0);
+            // process.stdout.write(`Downloading... ${percent.toFixed(2)}%`);
         });
     
         downloadVideo.pipe(outputStream);
     
         outputStream.on('open', () => {
-            process.stdout.write('Started downloading...\n');
+            console.log('Started downloading...\n');
         });
     
         outputStream.on('finish', () => {
-            process.stdout.write(`\nFinished downloading: ${outputPath}\n`);
+            console.log(`\nFinished downloading: ${outputPath}\n`);
             downloadInProgress = false;
             response.status(200).send('Download complete');
         });
