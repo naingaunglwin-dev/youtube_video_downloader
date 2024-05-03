@@ -1,8 +1,6 @@
 const ytdl       = require('ytdl-core');
 const fs         = require('fs');
 const path       = require('path');
-const os         = require('os');
-const uuid       = require('uuid');
 const express    = require('express');
 const { Router } = require('express');
 const bodyParser = require('body-parser');
@@ -36,40 +34,47 @@ route.post('/download', (request, response) => {
 
     ytdl.getInfo(videoUrl).then((info) => {
         const format = ytdl.chooseFormat(info.formats,{filter: 'audioandvideo', quality: 'highest'});
-    
-        const uniqueId = uuid.v4();
-        const outputPath = path.join(downloadPath, `${uniqueId}.mp4`);
+
+        const outputPath   = path.join(downloadPath, `${info.videoDetails.title.replace(/[/\\?%*:|"<>]/g, '_')}.mp4`);
         const outputStream = fs.createWriteStream(outputPath);
     
         const downloadVideo = ytdl.downloadFromInfo(info, { format: format });
     
         let downloaded = 0;
     
-        downloadVideo.on('progress', (chunkLength, downloadedBytes, totalBytes) => {
-            downloaded += chunkLength;
+        // Show download percent in cmd
+        // downloadVideo.on('progress', (chunkLength, downloadedBytes, totalBytes) => {
+        //     downloaded += chunkLength;
     
-            const percent = downloaded / totalBytes * 100;
-            // process.stdout.clearLine();
-            // process.stdout.cursorTo(0);
-            // process.stdout.write(`Downloading... ${percent.toFixed(2)}%`);
-        });
+        //     const percent = downloaded / totalBytes * 100;
+        //     process.stdout.clearLine();
+        //     process.stdout.cursorTo(0);
+        //     process.stdout.write(`Downloading... ${percent.toFixed(2)}%`);
+        // });
     
         downloadVideo.pipe(outputStream);
     
         outputStream.on('open', () => {
-            console.log('Started downloading...\n');
+            console.log('Your video downloading is started.\n');
         });
     
         outputStream.on('finish', () => {
             console.log(`\nFinished downloading: ${outputPath}\n`);
             downloadInProgress = false;
 
-            response.download(outputPath, `${uniqueId}.mp4`, (err) => {
+            fs.readFile(outputPath, (err, data) => {
                 if (err) {
-                    console.error('Error sending file:', err);
+                    console.error('Error reading file:', err);
                     response.sendStatus(500);
                 } else {
-                    console.log('File sent successfully');
+                    response.setHeader('Content-Type', 'video/mp4');
+
+                    const filename = info.videoDetails.title.replace(/[/\\?%*:|"<>]/g, '_') + '.mp4';
+                    const fileData = data.toString('base64');
+                    const responseData = { filename, fileData };
+
+                    response.json(responseData);
+
                     fs.unlink(outputPath, (unlinkErr) => {
                         if (unlinkErr) {
                             console.error('Error deleting file:', unlinkErr);

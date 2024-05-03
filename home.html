@@ -172,28 +172,37 @@
                 body: JSON.stringify({videoUrl: videoUrl})
             },
                 document.getElementById('progress').innerHTML = `<div>Preparing Download file...</div>`
-             ).then(response => {
-                if (response.ok) {
-                    response.blob().then(blob => {
-                        const url  = window.URL.createObjectURL(blob);
-                        const a    = document.createElement('a');
-                        a.href     = url;
-                        a.download = url.replace(/^.*[\\\/]/, '');
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        a.remove();
-                    });
-
-                    document.getElementById('progress').innerHTML = `<div>Start Downloading...</div>`;
-                    span.style.display = "block";
-                    input.value = '';
-                } else {
+             ).then(async (response) => {
+                if (!response.ok) {
                     document.getElementById('progress').innerHTML = `<div>Failed to download</div>`;
                     span.style.display = "block";
                 }
-            })
-            .catch(error => console.error('Error:', error));
+
+                const responseBody = await response.arrayBuffer();
+
+                const decoder  = new TextDecoder('utf-8');
+                const jsonData = decoder.decode(responseBody);
+
+                const data = JSON.parse(jsonData);
+
+                const { filename, fileData } = data;
+
+                const blob = new Blob([fileData], { type: 'video/mp4' });
+
+                const url = window.URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                document.getElementById('progress').innerHTML = `<div style="text-align: center;">Your video downloading is started.<br>You can close this window.<br></div>`;
+                span.style.display = "block";
+                input.value = '';
+            }).catch(error => console.error('Error:', error));
         });
 
        span.onclick = function() {
