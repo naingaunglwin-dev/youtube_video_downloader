@@ -232,7 +232,7 @@
                     window.URL.revokeObjectURL(url);
                     a.remove();
 
-                    document.getElementById('progress').innerHTML = `<div class="text-center"Your video downloading is started.<br>You can close this window.<br><br></div>`;
+                    document.getElementById('progress').innerHTML = `<div class="text-center">Your video downloading is started.<br>You can close this window.<br><br></div>`;
                     span.style.display = "block";
                     input.value = '';
                 }).catch(error => console.error('Error:', error));
