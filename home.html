@@ -18,7 +18,7 @@
             margin: 0;
             padding: 0;
             font-family: "Inter", sans-serif;
-            background: aliceblue;
+            background-image: linear-gradient(to right top, #f90505, #d32a28, #ab3938, #7f4241, #4f4444);
         }
 
         .container {
@@ -37,13 +37,18 @@
             place-self: center;
             max-width: 400px;
             width: 400px;
-            padding: 10px;
+            padding: 20px 30px;
             border-radius: 9px;
             text-align: center;
             box-shadow: 5px 8px 30px -6px rgba(0,0,0,0.7);
             -webkit-box-shadow: 5px 8px 30px -6px rgba(0,0,0,0.7);
             -moz-box-shadow: 5px 8px 30px -6px rgba(0,0,0,0.7);
             background: white;
+        }
+
+        .source-code-link {
+            text-decoration: none;
+            color: #01488f;
         }
 
         .container.inactive {
@@ -53,18 +58,20 @@
 
         input[type='text'] {
             width: 99.8%;
-            height: 35px;
+            height: 45px;
             border: none;
             outline: none;
             background: rgb(224, 224, 224);
             font-size: 10pt;
             border-radius: 4px;
             pointer-events: auto;
+            padding: 0 8px;
+            box-sizing: border-box;
         }
 
         #btn {
-            width: 100.5%;
-            height: 40px;
+            width: 100%;
+            height: 45px;
             border: none;
             outline: none;
             background: rgb(34, 152, 255);
@@ -80,7 +87,7 @@
             cursor: pointer;
         }
 
-        #myModal {
+        #myModal, #progressModal {
             display: none;
             position: absolute;
             top: 50%;
@@ -100,14 +107,20 @@
         }
 
         @media screen and (max-width: 650px) {
-            #myModal {
+            #myModal, #progressModal {
                 width: 90%;
             }
         }
 
-        @media screen and (max-width: 430px) {
+        @media screen and (max-width: 466px) {
             .container > div {
                 width: 320px;
+            }
+        }
+
+        @media screen and (max-width: 384px){
+            .container > div {
+                width: 290px;
             }
         }
 
@@ -130,7 +143,7 @@
             cursor: pointer;
         }
 
-        #progress {
+        #progress, #progress-container {
             padding: 20px;
             flex: 1;
             overflow-y: auto;
@@ -143,6 +156,24 @@
         .text-red {
             color: red;
         }
+
+        #progress-bar {
+            height: 30px;
+            width: 0;
+            background-color: #4bd851;
+            border-radius: 6px;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            transition: width 0.4s;
+        }
+
+        hr {
+            height: 1px;
+            border: none;
+            background: black;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -150,10 +181,12 @@
         <div>
             <h1>Youtube <i class="fa-brands fa-youtube text-red"></i><br>Video Downloader</h1>
             <form id="form" enctype="application/x-www-form-urlencoded">
-                <input type="text" id="url" placeholder=" Put youtube video url here">
+                <input type="text" id="url" placeholder="Put youtube video url here">
                 <button type="submit" id="btn">
                     Download <i class="fa-solid fa-download"></i>
                 </button>
+                <hr>
+                <p>Source Code: <a class="source-code-link" href="https://github.com/naingaunglwin-dev/youtube_video_downloader" target="_blank">Github</a></p>
             </form>
         </div>
     </div>
@@ -166,12 +199,23 @@
         </div>
     </div>
 
+    <div id="progressModal" class="modal">
+        <div class="modal-content">
+            <div id="progress-container">
+                <div id="progress-bar">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         let container = document.querySelector('.container');
 
         let modal = document.getElementById("myModal");
 
         let span = document.getElementsByClassName("close")[0];
+
+        const socket = io();
 
         document.getElementById('form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -232,7 +276,7 @@
                     window.URL.revokeObjectURL(url);
                     a.remove();
 
-                    document.getElementById('progress').innerHTML = `<div class="text-center">Your video downloading is started.<br>You can close this window.<br><br></div>`;
+                    document.getElementById('progress').innerHTML = `<div class="text-center">Process Finished.<br>You can close this window.<br><br></div>`;
                     span.style.display = "block";
                     input.value = '';
                 }).catch(error => console.error('Error:', error));
@@ -250,6 +294,23 @@
                 container.classList.remove("inactive");
             }
         }
+
+        socket.on('progress', (data) => {
+            modal.style.display = "none";
+            document.getElementById("progressModal").style.display = "block";
+            const progressBar = document.getElementById('progress-bar');
+            const percent = data.percent;
+
+            progressBar.style.width = `${percent}%`;
+            progressBar.textContent = `${percent}%`;
+
+            if (percent.split(".")[0] == '100') {
+                setTimeout(function() {
+                    document.getElementById("progressModal").style.display = "none";
+                    modal.style.display = "block";
+                }, 2000);
+            }
+        });
     </script>
 </body>
 </html>
