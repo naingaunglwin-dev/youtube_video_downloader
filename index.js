@@ -29,6 +29,7 @@ let downloadInProgress = false;
 
 route.post('/download', (request, response) => {
     const videoUrl = request.body.videoUrl;
+    const roomId   = request.body.roomId;
 
     if (downloadInProgress) {
         return response.status(409).send('Download is already in progress');
@@ -58,7 +59,7 @@ route.post('/download', (request, response) => {
 
             downloaded += chunkLength;
             const percent = downloaded / totalBytes * 100;
-            io.emit('progress', { percent: percent.toFixed(2) });
+            io.to(roomId).emit('progress', { percent: percent.toFixed(2) });
         });
 
         downloadVideo.pipe(outputStream);
@@ -99,6 +100,12 @@ route.post('/download', (request, response) => {
     }).catch((err) => {
         console.error(err);
         response.sendStatus(500);
+    });
+});
+
+io.on('connection', (socket) => {
+    socket.on('joinRoom', ({ roomId }) => {
+        socket.join(roomId);
     });
 });
 

@@ -216,6 +216,9 @@
         let span = document.getElementsByClassName("close")[0];
 
         const socket = io();
+        let roomId   = crypto.randomUUID();
+
+        socket.emit("joinRoom", { roomId });
 
         document.getElementById('form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -238,7 +241,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({videoUrl: videoUrl})
+                body: JSON.stringify({videoUrl: videoUrl, roomId: roomId})
                 },
                     document.getElementById('progress').innerHTML = `<div class="text-center">Preparing Download file...</div>`
                 ).then(async (response) => {
@@ -308,7 +311,7 @@
                 setTimeout(function() {
                     document.getElementById("progressModal").style.display = "none";
                     modal.style.display = "block";
-                }, 2000);
+                }, 4000);
             }
         });
     </script>
